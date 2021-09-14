@@ -1,0 +1,64 @@
+---
+title: "Data Cleaning"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE}
+library(dplyr)
+library(tidyr)
+```
+
+## Data Sources
+
+Read in the data from the [KNB](https://knb.ecoinformatics.org/#view/df35b.304.2). 
+
+```{r}
+catch_original <- read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1")
+
+glimpse(catch_original)
+```
+
+## Clean and Reshape Data
+
+* remove unnecessary columns
+
+```{r}
+catch_data <- catch_original %>% 
+  # select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum) Can list what you want to keep
+  select(-All, -notesRegCode) #or what you want to get rid of with a minus symbol
+```
+
+* check column types
+
+```{r}
+#catch_clean <- catch_data %>% 
+  #mutate(Chinook = as.numeric()) #as.numeric will try to coerce the column Chinook to numeric form (it was character). This code did not run, so the next code chunk will not run because catch_clean was not created here.
+
+```
+
+```{r}
+#i <- which(is.na(catch_clean$Chinook))
+#i
+
+#catch_original[i,] #in one row, the entry for Chinook is "I" not "1", go back to original data sheets to see if it is an error or a footnote
+```
+
+```{r}
+catch_clean <- catch_data %>% 
+  mutate(Chinook = if_else(Chinook == "I", "1", Chinook)) %>%  #if Chinook is equal to I, make it one, otherwise, leave it alone
+  mutate(Chinook = as.integer(Chinook)) #switched to as.integer to match the other column types in the dataset
+
+glimpse(catch_clean)  
+```
+
+
+* reshape data
+
+
+
+## Join to Regions Definitions 
+
