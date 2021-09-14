@@ -58,7 +58,80 @@ glimpse(catch_clean)
 
 * reshape data
 
+```{r}
+catch_long <- catch_clean %>% 
+  pivot_longer(cols = -c(Region, Year), names_to = "species", values_to = "catch")
+
+head(catch_long)
+```
+
+```{r}
+catch_wide <- catch_long %>% 
+  pivot_wider(names_from = Region, values_from = catch)
+
+head(catch_wide)
+```
+
+```{r}
+catch_long <- catch_long %>% 
+  rename(catch_thousands = catch) %>%  #rename the catch column to include units
+  mutate(catch = catch_thousands * 1000) #add a new catch column that is actually the number of fish
+
+head(catch_long)
+```
+
+* group and summarize data
+
+```{r}
+mean_region <- catch_long %>% 
+  group_by(Region) %>% 
+  summarize(catch_mean = mean(catch))
+
+head(mean_region)
+```
+
+```{r}
+mean_year <- catch_long %>% 
+  group_by(Year) %>% 
+  summarize(catch_mean = mean(catch))
+
+head(mean_year)
+```
+
+Using multiple grouping variables.  
+
+```{r}
+mean_year_species <- catch_long %>% 
+  group_by(Year, species) %>% 
+  summarize(catch_mean = mean(catch))
+
+head(mean_year_species)
+```
+
+Using multiple grouping variables and multiple statistics.  
+
+```{r}
+mean_region <- catch_long %>% 
+  group_by(Region, Year) %>% 
+  summarize(catch_mean = mean(catch), num_obs = n(), .groups = "drop") #can drop the groups to prevent grouping errors later
+
+head(mean_region)
+```
 
 
 ## Join to Regions Definitions 
+
+```{r}
+region_defs <- read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1") %>% 
+    select(code, mgmtArea)
+
+head(region_defs)
+```
+
+
+```{r}
+catch_joined <- left_join(catch_long, region_defs, by = c("Region" = "code"))
+
+head(catch_joined)
+```
 
